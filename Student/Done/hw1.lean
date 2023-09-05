@@ -194,7 +194,7 @@ of the type arguments are implicit and inferred.
 -/
 
 -- Implement glue_funs here
-def glue_funs {α : Type} {β : Type} {γ : Type} : (β → γ) → (α → β) → α → γ
+def glue_funs {α β γ : Type} : (β → γ) → (α → β) → α → γ
 | βγ, αβ, a => βγ (αβ a)
 
 -- test cases
