@@ -1,2 +1,7 @@
+#!/bin/bash
+
+git config --global user.email "John@Devost.net"
+git config --global user.name "DragonHuntrX"
+
 git config pull.rebase false
 git pull upstream main
