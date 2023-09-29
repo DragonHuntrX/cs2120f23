@@ -50,8 +50,8 @@ natural number, *n'*.
 -- Answer here
 
 def apply_n {α : Type} : (α → α) → α → Nat → α  
-| f, a, 0 => 
-| f, a, (n' + 1) => _
+| f, a, 0 => a
+| f, a, (n' + 1) => f (apply_n f a n')
 
 -- Test cases: confirm that expectations are correct
 
@@ -81,8 +81,8 @@ of the list.
 -/
 
 def len {α : Type} : List α → Nat
-| _ => _
-| h::t => _
+| [] => 0
+| h::t => .succ (len t)
 
 #eval @len Nat []                   -- expect 0
 #eval len [0,1,2]                   -- expect 3
@@ -107,8 +107,8 @@ be for your function to work in all cases.
 -/
 
 def reduce_and : List Bool → Bool
-| _ => _
-| _ => and _ _
+| [] => true
+| h::t => and h (reduce_and t)
 
 -- Test cases
 

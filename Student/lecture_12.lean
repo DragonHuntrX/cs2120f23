@@ -23,7 +23,6 @@ inductive unary_op : Type
 inductive binary_op : Type
 | and
 | or
-| imp
 
 inductive Expr : Type
 | var_exp (v : var)
@@ -51,7 +50,6 @@ def eval_un_op : unary_op → (Bool → Bool)
 def eval_bin_op : binary_op → (Bool → Bool → Bool)
 | binary_op.and => and
 | binary_op.or => or
-| binary_op.imp => fun c d => match c, d with | true, false => false | _, _ => true
 
 def Interp := var → Bool  
 
@@ -197,10 +195,6 @@ First, define *b, c,* *j,* and *a* as propositional variables
 *cheese,* *j* for *jam,* and *a* for α*. 
 -/
 
-def b := var.mk 0
-def j := var.mk 1
-def c := var.mk 2
-def a := var.mk 3
 
 /-!
 ### Atomic Propositions
@@ -208,17 +202,11 @@ def a := var.mk 3
 Define B, C, J and A as corresponding atomic propositions (Expr) 
 -/
 
-def B := {b}
-def C := {c}
-def J := {j}
-def A := {a}
 /-!
 ### Compound Propositions
 
 Now redefine the function names in HW5 in propositional logic (Expr)
 -/
-
-def e0 := (¬J ∨ ¬C) ⇒ ¬(J ∧ C)
 
 /-!
 ### Implement Syntax and Semantics for Implies and Biimplication
