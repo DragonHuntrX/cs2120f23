@@ -131,7 +131,7 @@ should return [false, true].
 
 def map_not : List Bool → List Bool 
 | [] => []
-| h::t => _   -- hint: use :: to construct answer
+| h::t => (not h)::(map_not t)   -- hint: use :: to construct answer
 
 -- test cases
 #eval map_not []              -- exect []
@@ -147,7 +147,9 @@ of all the natural numbers from *n* to *0*, inclusive.
 
 -- Your answer here
 
-
+def countdown : Nat → List Nat
+| 0 => 0::[]
+| (n + 1) => (.succ n)::(countdown n)
 
 -- test cases
 #eval countdown 0            -- expect [0]
@@ -168,9 +170,9 @@ this function as an analog of natural number addition.
 
 -- Here
 
-def concat {α : Type} : _
-| [], m => _
-| _, _ =>  _
+def concat {α : Type} : List α → List α → List α 
+| [], m => m
+| t::g, m => t::(concat g m) 
 
 -- Test cases
 
@@ -188,6 +190,9 @@ just that one element.
 
 -- Here
 
+def pure' : α → List α 
+| a => a::[] 
+
 #eval pure' "Hi"       -- expect ["Hi"]
 
 
@@ -202,9 +207,184 @@ list on the right. Instead, consider using *concat*.
 
 -- Answer here:
 
+def list_rev : List α → List α
+| [] => []
+| a::t => concat (list_rev t) (pure' a)
+
+#eval list_rev [1, 2, 3, 4]
 
 /-!
 ## Part 2: Propositional Logic: Syntax and Semantics
 
-Forthcoming as an update to this file.
+
+
+## HOMEWORK: 
+
+Refer to each of the problems in HW5, Part 1. 
+For each one, express the proposition that each function
+type represents using our formal notation for propositional
+logic. We'll take you through this exercise in steps. 
 -/
+
+structure var : Type := 
+(n: Nat)
+
+inductive unary_op : Type
+| not
+
+inductive binary_op : Type
+| and
+| or
+| imp
+| iff
+
+inductive Expr : Type
+| var_exp (v : var)
+| un_exp (op : unary_op) (e : Expr)
+| bin_exp (op : binary_op) (e1 e2 : Expr)
+
+notation "{"v"}" => Expr.var_exp v
+prefix:max "¬" => Expr.un_exp unary_op.not 
+infixr:35 " ∧ " => Expr.bin_exp binary_op.and  
+infixr:30 " ∨ " => Expr.bin_exp binary_op.or 
+infixr:25 " ⇒ " =>  Expr.bin_exp binary_op.imp
+infixr:20 " ⇔ " => Expr.bin_exp binary_op.iff 
+
+def eval_un_op : unary_op → (Bool → Bool)
+| unary_op.not => not
+
+def eval_bin_op : binary_op → (Bool → Bool → Bool)
+| binary_op.and => and
+| binary_op.or => or
+| binary_op.imp => fun c d => match c, d with | true, false => false | _, _ => true
+| binary_op.iff => fun c d => match c, d with | true, true | false, false => true | _, _ => false
+
+def Interp := var → Bool  
+
+def eval_expr : Expr → Interp → Bool 
+| (Expr.var_exp v),        i => i v
+| (Expr.un_exp op e),      i => (eval_un_op op) (eval_expr e i)
+| (Expr.bin_exp op e1 e2), i => (eval_bin_op op) (eval_expr e1 i) (eval_expr e2 i)
+
+/-!
+### #1. Propositional Variables
+
+First, define *b, c,* *j,* and *a* as propositional variables
+(of type *var*). We'll use *b* for *bread* or *beta*,* *c* for 
+*cheese,* *j* for *jam,* and *a* for α*. 
+-/
+
+def b := var.mk 0
+def j := var.mk 1
+def c := var.mk 2
+def a := var.mk 3
+
+-- get the index out of the c structure
+#eval c.n
+
+/-!
+### #2. Atomic Propositions
+
+Define B, C, J and A as corresponding atomic propositions,
+of type *Expr*. 
+-/
+
+def B := {b}     
+def C := {c}
+def J := {j}
+def A := {a}
+
+/-!
+### #3. Compound Propositions
+
+Now redefine the function names in HW5 in propositional logic (Expr)
+-/
+
+def e0 := (¬J ∨ ¬C) ⇒ ¬(J ∧ C)
+def demorgan1 := (¬J ∨ ¬C) ⇒ ¬(J ∧ C)
+def demorgan2 := ¬(A ∨ B) ⇒ (¬A ∧ ¬B)
+def demorgan3 := (¬J ∧ ¬C) ⇒ ¬(J ∨ C)
+
+/-!
+### #4. Implement Syntax and Semantics for Implies and Biimplication
+Next go back and extend our formalism to support the implies connective.
+Do the same for biimplication while you're at it. This is already done 
+for *implies*. Your job is to do the same for bi-implication, which
+Lean does not implement natively. 
+-/
+
+
+/-!
+### #5. Evaluate Propositions in Various Worlds
+
+Now evaluate each of these expressions under the all_true and all_false
+interpretations. These are just two of the possible interpretations so
+we won't have complete proofs of validity, but at least we expect them
+to evaluate to true under both the all_true and all_false interpretations.
+-/
+
+#eval eval_expr e0 (λ _ => false) -- expect true
+#eval eval_expr e0 (λ _ => true)  -- expect true
+
+-- You do the rest
+#eval eval_expr demorgan1 (λ _ => false) -- expect true
+#eval eval_expr demorgan1 (λ _ => true) -- expect true
+
+#eval eval_expr demorgan2 (λ _ => false) -- expect true
+#eval eval_expr demorgan2 (λ _ => true) -- expect true
+
+#eval eval_expr demorgan3 (λ _ => false) -- expect true
+#eval eval_expr demorgan3 (λ _ => true) -- expect true
+
+
+/-!
+### #6. Evaluate the Expressions Under Some Other Interpretation
+
+Other than these two, evaluate the propositions under your new
+interpretation, and confirm that they still evaluate to true.
+Your interpretation should assign various true and false values
+to *j, c, b,* and *a.* An interpretation has to give values to
+all (infinitely many) variables. You can do case analysis by
+pattern matching on a few specific variables (by index) then 
+use wildcard matching to handle all remaining cases.
+-/
+
+-- Answer here
+def isodd : Nat → Bool
+| 0 => false
+| 1 => true
+| n + 2 => isodd n
+
+def oddtrue : var → Bool
+| n => isodd n.n
+
+def custom_interp : var → Bool
+| v => match v.n with 
+  | 0 => true
+  | 1 => false
+  | 2 => false
+  | 3 => true
+  | _ => false
+  
+def custom_interp' : var → Bool
+| v => match v.n with 
+  | 0 => true
+  | 1 => false
+  | 2 => false
+  | 3 => true
+  | _ => false
+
+#eval eval_expr e0 custom_interp -- expect true
+#eval eval_expr e0 oddtrue -- expect true
+
+-- You do the rest
+#eval eval_expr demorgan1 custom_interp -- expect true
+#eval eval_expr demorgan1 oddtrue -- expect true
+
+#eval eval_expr demorgan2 custom_interp -- expect true
+#eval eval_expr demorgan2 oddtrue -- expect true
+
+#eval eval_expr demorgan3 custom_interp -- expect true
+#eval eval_expr demorgan3 oddtrue -- expect true
+
+

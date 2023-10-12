@@ -321,7 +321,7 @@ pair swap function, taking each (a,b) pair to (b,a).
 #check λ {α β : Type} 
          (p : α × β)            -- pair object
          =>
-        match p with            -- analyze p ...
+        match p with             -- analyze p ...
         | (a, b) =>             -- ... as (a, b)
           (b, a)                -- return (b,a) 
 
