@@ -291,6 +291,8 @@ the Sandwich type.
 
 structure Sandwich : Type := (b:Bread) (t: Spread ⊕ Cheese)
 
+inductive Sandwich'
+| mk (b: Bread) (t: Spread ⊕ Cheese) 
 /-
 ### c. Now make yourself a Sandwich [15 points]
 
@@ -304,6 +306,7 @@ bread and jam as a spread.
 
 def jam_sandwich : Sandwich := Sandwich.mk Bread.wheat (.inl Spread.jam)
 
+#reduce jam_sandwich
 
 /-! 
 ### #3 Recursive Data and Functions [15 points]
@@ -372,7 +375,6 @@ without error.
 -/
 
 def X := {var.mk 0}
-#eval num_vars (X ⇒ ⊥)
 #eval is_sat (X ⇒ ⊥)  -- expect true
 /-! 
 ### b. Give a model for (X ⇒ ⊥)
